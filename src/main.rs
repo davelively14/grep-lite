@@ -1,6 +1,7 @@
 fn main() {
     basic_grep();
     arrays();
+    vector_grep();
 }
 
 fn basic_grep() {
@@ -28,8 +29,8 @@ fn arrays() {
 
     let arrays = [one, two, blank1, blank2];
 
-    // &arrays reference a slice of contiguous memory
-    // Can iterate on a slice without calling iter()
+    // &arrays reference a slice of contiguous memory, which can be iterated on
+    // without calling iter()
     for a in &arrays {
         print!("{:?}: ", a);
         for n in a.iter() {
@@ -44,4 +45,79 @@ fn arrays() {
         print!("\t(Σ{:?} = {})", a, sum);
         println!("");
     }
+}
+
+fn vector_grep() {
+    // PARAMS
+    let context_lines = 2;
+    let needle = "book";
+    let haystack = "Every face, every shop,
+bedroom window, public-house, and
+dark square is a picture
+feverishly turned--in search of what?
+It is the same with books.
+What do we seek
+through millions of pages?";
+
+    // INITIALIZATION
+
+    // tags contain the index for the line where the matches exist
+    let mut tags: Vec<usize> = Vec::new();
+
+    // ctx contains a vector per match to hold the context line numbers and the
+    // line String for each match
+    let mut ctx: Vec<Vec<(usize, String)>> = Vec::new();
+
+    // PASS 1
+    for (i, line) in haystack.lines().enumerate() {
+        if line.contains(needle) {
+            // Add line number to end of tags
+            tags.push(i);
+
+            // Reserves spaces for all context_lines plus the line that matches
+            // Vec<T> will perform best when you provide it with a size hint
+            let v = Vec::with_capacity(2 * context_lines + 1);
+            ctx.push(v);
+        }
+    }
+
+    if tags.len() == 0 {
+        return;
+    }
+
+    // PASS 2
+    // For each tag, at every line, check to see if a match is nearby, and if so
+    // add to ctx
+    for (i, line) in haystack.lines().enumerate() {
+        for (j, tag) in tags.iter().enumerate() {
+            // saturating_sub is subtraction that returns 0 on integer overflow
+            let lower_bound = tag.saturating_sub(context_lines);
+            let upper_bound = tag + context_lines;
+
+            if (i >= lower_bound) && (i <= upper_bound) {
+                let line_as_string = String::from(line);
+                let local_ctx = (i, line_as_string);
+                ctx[j].push(local_ctx);
+            }
+        }
+    }
+
+    // OUTPUT
+    for local_ctx in ctx.iter() {
+        // ref borrows line
+        for &(i, ref line) in local_ctx.iter() {
+            let line_num = i + 1;
+            println!("{}: {}", line_num, line);
+        }
+    }
+
+    print!("Tags:\t[");
+    for (i, local_tag) in tags.iter().enumerate() {
+        if i + 1 == tags.len() {
+            print!("{}", local_tag);
+        } else {
+            print!("{}, ", local_tag);
+        }
+    }
+    println!("]");
 }
