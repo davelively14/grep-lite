@@ -4,8 +4,10 @@ extern crate regex;
 use clap::{App, Arg};
 use regex::Regex;
 use std::fs::File;
-use std::io::prelude::*;
+use std::io;
 use std::io::BufReader;
+use std::io::BufRead;
+
 
 fn main() {
     println!("Trainer functions:");
@@ -30,6 +32,18 @@ fn trainer() {
     vector_grep();
 }
 
+fn process_lines<T: BufRead + Sized>(reader: T, re: Regex) {
+    for line_ in reader.lines() {
+        let line = line_.unwrap();
+
+        // Need to take a slice of line String to make a &str
+        match re.find(&line) {
+            Some(_) => println!("{}", line),
+            None => (),
+        }
+    }
+}
+
 fn grep() {
     let args = App::new("grep-lite")
         .version("0.1")
@@ -51,21 +65,19 @@ fn grep() {
     let pattern = args.value_of("pattern").unwrap();
     let re = Regex::new(pattern).unwrap();
 
-    let input = args.value_of("input").unwrap();
-    let f = File::open(input).unwrap();
-    let reader = BufReader::new(f);
-
     println!("Input: {}", pattern);
     println!("");
 
-    for line_ in reader.lines() {
-        let line = line_.unwrap();
+    let input = args.value_of("input").unwrap_or("-");
 
-        // Need to take a slice of line String to make a &str
-        match re.find(&line) {
-            Some(_) => println!("{}", line),
-            None => (),
-        }
+    if input == "-" {
+        let stdin = io::stdin();
+        let reader = stdin.lock();
+        process_lines(reader, re);
+    } else {
+        let f = File::open(input).unwrap();
+        let reader = BufReader::new(f);
+        process_lines(reader, re)
     }
 }
 
