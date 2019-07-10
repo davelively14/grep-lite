@@ -4,9 +4,9 @@ extern crate regex;
 use clap::{App, Arg};
 use regex::Regex;
 use std::fs::File;
-
 use std::io::prelude::*;
 use std::io::BufReader;
+
 fn main() {
     println!("Trainer functions:");
     trainer();
