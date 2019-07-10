@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 regex = "1.1.9"
+clap = "2.33.0"
