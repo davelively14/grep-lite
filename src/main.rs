@@ -17,6 +17,9 @@ It is the same with books. What do we seek through millions of pages?";
     }
 }
 
+// Items in arrays are accessed directly on the stack instead of a pointer,
+// like in C. The compiler knows the size of an array's members and calculates
+// memory offsets itself, so no pointer math needed.
 fn arrays() {
     let one = [1, 2, 3];
     let two: [u8; 3] = [1, 2, 3];
@@ -25,6 +28,8 @@ fn arrays() {
 
     let arrays = [one, two, blank1, blank2];
 
+    // &arrays reference a slice of contiguous memory
+    // Can iterate on a slice without calling iter()
     for a in &arrays {
         print!("{:?}: ", a);
         for n in a.iter() {
