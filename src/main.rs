@@ -3,7 +3,10 @@ extern crate regex;
 
 use clap::{App, Arg};
 use regex::Regex;
+use std::fs::File;
 
+use std::io::prelude::*;
+use std::io::BufReader;
 fn main() {
     println!("Trainer functions:");
     trainer();
@@ -11,7 +14,13 @@ fn main() {
     println!("No input grep:");
     no_input_grep();
 
-    println!("Actual CLI grep:");
+    println!("Reading from files trainer:");
+    read_from_file("README.md");
+
+    println!("");
+    println!("###################");
+    println!("# Actual CLI grep #");
+    println!("###################");
     grep();
 }
 
@@ -40,11 +49,24 @@ fn grep() {
 dark square is a picture feverishly turned--in search of what?
 It is the same with books. What do we seek through millions of pages?";
 
+    println!("Input: {}", pattern);
+    println!("");
+
     for line in quote.lines() {
         match re.find(line) {
             Some(_) => println!("{}", line),
             None => (),
         }
+    }
+}
+
+fn read_from_file(filename: &str) {
+    let f = File::open(filename).unwrap();
+    let reader = BufReader::new(f);
+
+    for local_line in reader.lines() {
+        let line = local_line.unwrap();
+        println!("{} // ({} bytes long)", line, line.len());
     }
 }
 
