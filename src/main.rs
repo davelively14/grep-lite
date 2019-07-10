@@ -1,7 +1,37 @@
+// Point to external crate
+extern crate regex;
+
+// Bring regex::Regex type into scope
+use regex::Regex;
+
 fn main() {
+    println!("Trainer functions:");
+    trainer();
+
+    println!("Actual grep:");
+    grep();
+}
+
+fn trainer() {
     basic_grep();
     arrays();
     vector_grep();
+}
+
+fn grep() {
+    // "unwraps" a result, or panics if an error occurs (MTF)
+    let re = Regex::new("picture").unwrap();
+
+    let quote = "Every face, every shop, bedroom window, public-house and
+dark square is a picture feverishly turned--in search of what?
+It is the same with books. What do we seek through millions of pages?";
+
+    for line in quote.lines() {
+        match re.find(line) {
+            Some(_) => println!("{}", line),
+            None => (),
+        }
+    }
 }
 
 fn basic_grep() {
